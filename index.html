@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' https://launchermeta.mojang.com https://*.mojang.com https://api.modrinth.com https://meta.fabricmc.net https://cdn.modrinth.com https://files.minecraftforge.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: file: https://*.mojang.com https://mc-heads.net https://cdn.modrinth.com;">
+  <title>Snail Launcher</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-theme="mocha">
+  <div class="bg-img"></div>
+  <div id="toast" class="toast"></div>
+
+  <div class="app">
+    <nav class="sidebar">
+      <div class="brand"><span class="brand-icon">🐌</span><h1>Snail</h1></div>
+      <div class="nav">
+        <button class="nav-btn active" data-screen="home"><span class="icon">🏠</span>Home</button>
+        <button class="nav-btn" data-screen="instances"><span class="icon">📦</span>Instances</button>
+        <button class="nav-btn" data-screen="mods"><span class="icon">🧩</span>Mods</button>
+        <button class="nav-btn" data-screen="modules"><span class="icon">⚡</span>Modules</button>
+        <div class="nav-sep"></div>
+        <button class="nav-btn" data-screen="skins"><span class="icon">👤</span>Skins</button>
+        <button class="nav-btn" data-screen="console"><span class="icon">📋</span>Console</button>
+        <button class="nav-btn" data-screen="settings"><span class="icon">⚙️</span>Settings</button>
+        <button class="nav-btn" data-screen="accounts"><span class="icon">👥</span>Accounts</button>
+      </div>
+      <button class="login-btn" id="sidebar-login" onclick="doLogin()">🔑 Login with Microsoft</button>
+      <div class="account-card" id="sidebar-account" style="display:none" onclick="showScreen('accounts')">
+        <div class="avatar" id="sidebar-avatar">?</div>
+        <div class="account-info"><span class="name" id="sidebar-name">Player</span><span class="status">● Online</span></div>
+      </div>
+    </nav>
+
+    <main class="main">
+      <!-- HOME -->
+      <section id="screen-home" class="screen active">
+        <div class="home-hero">
+          <p style="color:var(--text-dim);font-weight:600;font-size:0.9rem;">Welcome back,</p>
+          <h2 id="home-username">Explorer</h2>
+          <p class="subtitle">"Slow and steady wins the race." — Your premium Minecraft experience.</p>
+          <div class="quick-actions">
+            <button class="btn btn-primary" onclick="quickLaunch()">▶ Quick Launch</button>
+            <button class="btn" onclick="showScreen('instances')">+ New Instance</button>
+          </div>
+        </div>
+        <div class="stat-grid">
+          <div class="card stat-card"><div class="stat-val" id="stat-instances">0</div><div class="stat-label">Instances</div></div>
+          <div class="card stat-card"><div class="stat-val" id="stat-mods">0</div><div class="stat-label">Mods Installed</div></div>
+          <div class="card stat-card"><div class="stat-val" id="stat-accounts">0</div><div class="stat-label">Accounts</div></div>
+          <div class="card stat-card"><div class="stat-val" id="stat-version">2.0.0</div><div class="stat-label">Launcher Version</div></div>
+        </div>
+      </section>
+
+      <!-- INSTANCES -->
+      <section id="screen-instances" class="screen">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+          <div><h1 class="screen-title">Instances</h1><p class="screen-sub" style="margin:0">Manage your Minecraft installations</p></div>
+          <button class="btn btn-primary" onclick="openCreateInstance()">+ Create Instance</button>
+        </div>
+        <div class="card-grid" id="instances-list"></div>
+        <div class="empty-state" id="instances-empty" style="display:none"><div class="empty-icon">📦</div><h3>No instances yet</h3><p>Create your first instance to get started!</p><button class="btn btn-primary" onclick="openCreateInstance()">+ Create Instance</button></div>
+      </section>
+
+      <!-- MODS -->
+      <section id="screen-mods" class="screen">
+        <h1 class="screen-title">Mods</h1>
+        <p class="screen-sub">Browse and install mods from Modrinth</p>
+        <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
+          <div class="search-bar" style="flex:1;min-width:200px;margin-bottom:0"><input class="input" id="mod-search" placeholder="Search mods..." onkeydown="if(event.key==='Enter')searchMods()"></div>
+          <select class="input" id="mod-instance-select" style="width:220px" onchange="searchMods()"><option value="">Select Instance</option></select>
+          <button class="btn btn-primary" onclick="searchMods()">Search</button>
+        </div>
+        <div class="tabs"><button class="tab active" onclick="setModTab(this,'search')">Search</button><button class="tab" onclick="setModTab(this,'installed')">Installed</button></div>
+        <div id="mod-results"></div>
+        <div id="mod-installed" style="display:none"></div>
+      </section>
+
+      <!-- MODULES -->
+      <section id="screen-modules" class="screen">
+        <h1 class="screen-title">Modules</h1>
+        <p class="screen-sub">Built-in mods — toggle to enable. Requires Fabric.</p>
+        <select class="input" id="module-instance-select" style="width:280px;margin-bottom:24px" onchange="loadModules()"><option value="">Select Instance</option></select>
+        <div id="modules-list"></div>
+        <div class="empty-state" id="modules-empty" style="display:none"><div class="empty-icon">⚡</div><h3>Select a Fabric instance</h3><p>Pick an instance above to toggle modules.</p></div>
+      </section>
+
+      <!-- SKINS -->
+      <section id="screen-skins" class="screen">
+        <h1 class="screen-title">Skins</h1>
+        <p class="screen-sub">Preview and manage your character skins</p>
+        <div class="skin-area">
+          <div class="skin-preview-box"><img id="skin-preview" src="https://mc-heads.net/body/steve" alt="Skin"></div>
+          <div class="skin-controls">
+            <div class="skin-upload-zone" id="skin-upload-zone" onclick="uploadSkin()">
+              <div class="upload-icon">📤</div>
+              <p><strong>Click to upload</strong> a skin file (.png)</p>
+              <p style="font-size:0.75rem;margin-top:8px;color:var(--text-muted)">64x64 or 64x32 PNG</p>
+            </div>
+            <div style="margin-top:20px">
+              <h3 style="font-family:'Outfit';font-size:1rem;margin-bottom:12px">Saved Skins</h3>
+              <div id="skin-list" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CONSOLE -->
+      <section id="screen-console" class="screen">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <div><h1 class="screen-title">Console</h1><p class="screen-sub" style="margin:0">Live game output</p></div>
+          <button class="btn btn-sm" onclick="clearConsole()">Clear</button>
+        </div>
+        <div class="console-output" id="console-output">Waiting for game launch...\n</div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section id="screen-settings" class="screen">
+        <h1 class="screen-title">Settings</h1>
+        <p class="screen-sub">Configure your launcher</p>
+
+        <div class="card settings-group">
+          <div class="settings-group-title">🎮 Game</div>
+          <div class="settings-row">
+            <div class="settings-label"><span style="font-weight:700">RAM Allocation</span><span class="desc">Memory for Minecraft</span></div>
+            <div class="settings-control" style="gap:12px;min-width:220px"><input type="range" id="set-ram" min="2" max="16" step="1" value="4" oninput="document.getElementById('set-ram-val').textContent=this.value+'GB'" style="flex:1"><span id="set-ram-val" style="font-weight:800;color:var(--primary);min-width:40px">4GB</span></div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-label"><span style="font-weight:700">Java Path</span><span class="desc">Auto-detected or manual</span></div>
+            <div class="settings-control" style="gap:8px"><select class="input" id="set-java" style="width:200px;font-size:0.78rem"><option value="">Auto-detect</option></select><button class="btn btn-sm" onclick="refreshJava()">Scan</button></div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-label"><span style="font-weight:700">Close on Launch</span><span class="desc">Hide launcher when game starts</span></div>
+            <div class="settings-control"><label class="toggle"><input type="checkbox" id="set-close-launch"><span class="slider"></span></label></div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-label"><span style="font-weight:700">Show Snapshots</span><span class="desc">Include snapshot versions</span></div>
+            <div class="settings-control"><label class="toggle"><input type="checkbox" id="set-snapshots"><span class="slider"></span></label></div>
+          </div>
+        </div>
+
+        <div class="card settings-group">
+          <div class="settings-group-title">🎨 Theme</div>
+          <div class="theme-grid">
+            <div class="theme-swatch active" data-theme="mocha" onclick="setTheme('mocha')" style="background:linear-gradient(135deg,#1e1e2e,#a6e3a1)"><span>Mocha</span></div>
+            <div class="theme-swatch" data-theme="midnight" onclick="setTheme('midnight')" style="background:linear-gradient(135deg,#050509,#7dc4e4)"><span>Midnight</span></div>
+            <div class="theme-swatch" data-theme="ocean" onclick="setTheme('ocean')" style="background:linear-gradient(135deg,#091017,#74c7ec)"><span>Ocean</span></div>
+            <div class="theme-swatch" data-theme="rose" onclick="setTheme('rose')" style="background:linear-gradient(135deg,#140e16,#f5c2e7)"><span>Rose</span></div>
+          </div>
+        </div>
+
+        <button class="btn btn-primary" onclick="saveSettings()" style="margin-top:8px">Save Settings</button>
+      </section>
+
+      <!-- ACCOUNTS -->
+      <section id="screen-accounts" class="screen">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+          <div><h1 class="screen-title">Accounts</h1><p class="screen-sub" style="margin:0">Microsoft & offline accounts</p></div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-primary" onclick="doLogin()">+ Microsoft</button>
+            <button class="btn btn-secondary" onclick="openOfflineModal()">+ Offline</button>
+          </div>
+        </div>
+        <div class="account-list" id="accounts-list"></div>
+        <div class="empty-state" id="accounts-empty" style="display:none"><div class="empty-icon">👥</div><h3>No accounts</h3><p>Add a Microsoft or offline account to play.</p></div>
+      </section>
+
+      <!-- Progress -->
+      <div class="progress-wrap" id="progress-wrap">
+        <div class="progress-header"><span id="progress-text">Ready</span><span id="progress-pct">0%</span></div>
+        <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+      </div>
+
+      <!-- Action Bar -->
+      <div class="action-bar">
+        <div class="action-left"><span class="label">Selected Instance</span><span class="value" id="action-instance">None</span></div>
+        <button class="play-btn" id="play-btn" disabled onclick="playGame()">Login to Play</button>
+      </div>
+    </main>
+  </div>
+
+  <!-- Create Instance Modal -->
+  <div class="modal-overlay" id="modal-create"><div class="modal">
+    <h2>Create Instance</h2><p class="modal-sub">Set up a new Minecraft installation</p>
+    <div class="form-group"><label>Instance Name</label><input class="input" id="ci-name" placeholder="My World"></div>
+    <div class="form-group"><label>Minecraft Version</label><select class="input" id="ci-version"></select></div>
+    <div class="form-group"><label>Mod Loader</label><select class="input" id="ci-loader" onchange="onLoaderChange()"><option value="vanilla">Vanilla</option><option value="fabric">Fabric</option></select></div>
+    <div class="form-group" id="ci-loader-version-wrap" style="display:none"><label>Loader Version</label><select class="input" id="ci-loader-version"><option>Loading...</option></select></div>
+    <div class="modal-actions"><button class="btn" onclick="closeModal('modal-create')">Cancel</button><button class="btn btn-primary" id="ci-submit" onclick="submitCreateInstance()">Create</button></div>
+  </div></div>
+
+  <!-- Offline Account Modal -->
+  <div class="modal-overlay" id="modal-offline"><div class="modal">
+    <h2>Add Offline Account</h2><p class="modal-sub">Play without a Microsoft account (singleplayer only)</p>
+    <div class="form-group"><label>Username</label><input class="input" id="offline-name" placeholder="Steve" maxlength="16"></div>
+    <div class="modal-actions"><button class="btn" onclick="closeModal('modal-offline')">Cancel</button><button class="btn btn-primary" onclick="submitOfflineAccount()">Add Account</button></div>
+  </div></div>
+
+  <!-- Confirm Modal -->
+  <div class="modal-overlay" id="modal-confirm"><div class="modal">
+    <h2 id="confirm-title">Confirm</h2><p id="confirm-msg" style="color:var(--text-dim);margin-bottom:24px"></p>
+    <div class="modal-actions"><button class="btn" onclick="closeModal('modal-confirm')">Cancel</button><button class="btn btn-danger" id="confirm-btn">Confirm</button></div>
+  </div></div>
+
+  <!-- Instance Detail Modal -->
+  <div class="modal-overlay" id="modal-instance"><div class="modal" style="max-width:600px">
+    <h2 id="inst-detail-name">Instance</h2><p class="modal-sub" id="inst-detail-sub"></p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px" id="inst-detail-tags"></div>
+    <div class="form-group"><label>Instance RAM (GB)</label><input class="input" id="inst-ram" type="number" min="1" max="32" value="4"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px">
+      <button class="btn" onclick="openInstanceModsTab()">🧩 Manage Mods</button>
+      <button class="btn" onclick="openInstanceFolder(currentDetailInstance)">📁 Open Folder</button>
+      <button class="btn btn-danger" onclick="deleteInstanceFromDetail()">🗑️ Delete</button>
+    </div>
+    <div class="modal-actions"><button class="btn" onclick="closeModal('modal-instance')">Close</button><button class="btn btn-primary" onclick="saveInstanceDetail()">Save</button></div>
+  </div></div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+{
+  "name": "snail-launcher",
+  "version": "2.0.0",
+  "description": "A premium Minecraft launcher with mod support, instances, and built-in modules",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["minecraft", "launcher", "electron"],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "electron": "^41.5.0"
+  },
+  "dependencies": {
+    "minecraft-launcher-core": "^3.18.2",
+    "msmc": "^5.0.5"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "snailmod",
+  "version": "${version}",
+  "name": "Snail Mod",
+  "description": "In-game module menu for Snail Launcher. Press RIGHT SHIFT to open.",
+  "authors": ["SnailTeam"],
+  "contact": {},
+  "license": "MIT",
+  "icon": "assets/snailmod/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": ["dev.snail.SnailMod"]
+  },
+  "mixins": ["snailmod.mixins.json"],
+  "depends": {
+    "fabricloader": ">=0.14.0",
+    "minecraft": ">=1.20.0",
+    "java": ">=17"
+  }
+}

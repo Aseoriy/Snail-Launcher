@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "package": "dev.snail.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "client": [
+    "ClientTickMixin",
+    "HudMixin",
+    "FastPlaceMixin",
+    "NoFallMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 0
+  }
+}
